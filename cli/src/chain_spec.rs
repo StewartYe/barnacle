@@ -41,8 +41,7 @@ use beefy_primitives::crypto::AuthorityId as BeefyId;
 
 // + octopus pallets
 use appchain_barnacle_runtime::{
-	constants::currency::EBAR, OctopusAppchainConfig, OctopusAssetsConfig, OctopusBridgeConfig,
-	OctopusLposConfig, OctopusUpwardMessagesConfig,
+	constants::currency::EBAR, OctopusAssetsConfig,
 };
 use pallet_octopus_appchain::ecdsa::AuthorityId as OctopusId;
 
@@ -79,9 +78,8 @@ fn session_keys(
 	grandpa: GrandpaId,
 	im_online: ImOnlineId,
 	beefy: BeefyId,
-	octopus: OctopusId,
 ) -> SessionKeys {
-	SessionKeys { babe, grandpa, im_online, beefy, octopus }
+	SessionKeys { babe, grandpa, im_online, beefy }
 }
 
 /// Helper function to generate a crypto pair from seed
@@ -167,7 +165,6 @@ pub fn testnet_genesis(
 							x.2.clone(),
 							x.3.clone(),
 							x.4.clone(),
-							x.5.clone(),
 						),
 					)
 				})
@@ -181,16 +178,6 @@ pub fn testnet_genesis(
 		im_online: ImOnlineConfig { keys: vec![] },
 		grandpa: GrandpaConfig { authorities: vec![] },
 		transaction_payment: Default::default(),
-		octopus_appchain: OctopusAppchainConfig {
-			anchor_contract: "octopus-anchor.testnet".to_string(),
-			validators,
-		},
-		octopus_bridge: OctopusBridgeConfig {
-			premined_amount: 1024 * EBAR,
-			asset_id_by_token_id: vec![("usdn.testnet".to_string(), 0)],
-		},
-		octopus_lpos: OctopusLposConfig { era_payout: 2 * EBAR, ..Default::default() },
-		octopus_upward_messages: OctopusUpwardMessagesConfig { interval: 1 },
 		octopus_assets: OctopusAssetsConfig {
 			assets: vec![(
 				0,
