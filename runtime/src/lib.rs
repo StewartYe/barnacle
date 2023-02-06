@@ -248,11 +248,7 @@ impl pallet_babe::Config for Runtime {
 		pallet_babe::AuthorityId,
 	)>>::IdentificationTuple;
 
-	type HandleEquivocation = pallet_babe::EquivocationHandler<
-		Self::KeyOwnerIdentification,
-		pallet_octopus_lpos::FilterHistoricalOffences<OctopusLpos, Offences>,
-		ReportLongevity,
-	>;
+	type HandleEquivocation = ();
 
 	type WeightInfo = ();
 	type MaxAuthorities = MaxAuthorities;
@@ -305,7 +301,7 @@ impl pallet_timestamp::Config for Runtime {
 	type WeightInfo = pallet_timestamp::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
+/*parameter_types! {
 	pub const UncleGenerations: BlockNumber = 0;
 }
 
@@ -313,8 +309,9 @@ impl pallet_authorship::Config for Runtime {
 	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
 	type UncleGenerations = UncleGenerations;
 	type FilterUncle = ();
-	type EventHandler = (OctopusLpos, ImOnline);
-}
+	//type EventHandler = (OctopusLpos, ImOnline);
+	type EventHandler = ();
+}*/
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -322,7 +319,6 @@ impl_opaque_keys! {
 		pub grandpa: Grandpa,
 		pub im_online: ImOnline,
 		pub beefy: Beefy,
-		pub octopus: OctopusAppchain,
 	}
 }
 
@@ -332,7 +328,7 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = ConvertInto;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
-	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, OctopusLpos>;
+	type SessionManager = ();//pallet_session::historical::NoteHistoricalRoot<Self, OctopusLpos>;
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
@@ -340,7 +336,7 @@ impl pallet_session::Config for Runtime {
 
 impl pallet_session::historical::Config for Runtime {
 	type FullIdentification = u128;
-	type FullIdentificationOf = pallet_octopus_lpos::ExposureOf<Runtime>;
+	type FullIdentificationOf = ();//pallet_octopus_lpos::ExposureOf<Runtime>;
 }
 
 pub struct FindAuthorAdapter<T, Inner>(sp_std::marker::PhantomData<(T, Inner)>);
@@ -533,20 +529,23 @@ impl pallet_im_online::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type NextSessionRotation = Babe;
 	type ValidatorSet = Historical;
-	type ReportUnresponsiveness =
+	/*type ReportUnresponsiveness =
 		pallet_octopus_lpos::FilterHistoricalOffences<OctopusLpos, Offences>;
+	*/
+	type  ReportUnresponsiveness = ();
 	type UnsignedPriority = ImOnlineUnsignedPriority;
 	type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
 	type MaxKeys = MaxKeys;
 	type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
 	type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
 }
-
+/*
 impl pallet_offences::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
 	type OnOffenceHandler = ();
 }
+*/
 
 impl pallet_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
@@ -561,11 +560,12 @@ impl pallet_grandpa::Config for Runtime {
 		GrandpaId,
 	)>>::IdentificationTuple;
 
-	type HandleEquivocation = pallet_grandpa::EquivocationHandler<
+/*	type HandleEquivocation = pallet_grandpa::EquivocationHandler<
 		Self::KeyOwnerIdentification,
 		pallet_octopus_lpos::FilterHistoricalOffences<OctopusLpos, Offences>,
 		ReportLongevity,
-	>;
+	>;*/
+	type HandleEquivocation = ();
 
 	type WeightInfo = ();
 	type MaxAuthorities = MaxAuthorities;
@@ -715,82 +715,6 @@ impl frame_system::offchain::AppCrypto<<Signature as traits::Verify>::Signer, Si
 	type GenericPublic = ecdsa::Public;
 }
 
-parameter_types! {
-	   pub const OctopusPalletId: PalletId = PalletId(*b"py/octps");
-	   pub const GracePeriod: u32 = 10;
-	   pub const UnsignedPriority: u64 = 1 << 21;
-	   pub const RequestEventLimit: u32 = 10;
-}
-
-impl pallet_octopus_appchain::Config for Runtime {
-	type AuthorityId = pallet_octopus_appchain::ecdsa::AuthorityId;
-	type AppCrypto = OctopusAppCrypto;
-	type RuntimeEvent = RuntimeEvent;
-	type RuntimeCall = RuntimeCall;
-	type BridgeInterface = OctopusBridge;
-	type LposInterface = OctopusLpos;
-	type UpwardMessagesInterface = OctopusUpwardMessages;
-	type GracePeriod = GracePeriod;
-	type UnsignedPriority = UnsignedPriority;
-	type MaxValidators = MaxAuthorities;
-	type RequestEventLimit = RequestEventLimit;
-	type WeightInfo = pallet_octopus_appchain::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub const NativeTokenDecimals: u128 = 1_000_000_000_000_000_000;
-	pub const FeeTh: u64 = 300;
-}
-
-impl pallet_octopus_bridge::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type PalletId = OctopusPalletId;
-	type Currency = Balances;
-	type AppchainInterface = OctopusAppchain;
-	type UpwardMessagesInterface = OctopusUpwardMessages;
-	type AssetIdByTokenId = OctopusBridge;
-	type AssetId = AssetId;
-	type AssetBalance = AssetBalance;
-	type Fungibles = OctopusAssets;
-	type CollectionId = CollectionId;
-	type ItemId = ItemId;
-	type Nonfungibles = OctopusUniques;
-	type Convertor = pallet_evm_precompile_octopus_uniques::impls::Erc721MetadataConvertor<Runtime>;
-	type NativeTokenDecimals = NativeTokenDecimals;
-	type Threshold = FeeTh;
-	type WeightInfo = pallet_octopus_bridge::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	pub const BondingDuration: pallet_octopus_lpos::EraIndex = 24 * 21;
-}
-
-impl pallet_octopus_lpos::Config for Runtime {
-	type Currency = Balances;
-	type UnixTime = Timestamp;
-	type RuntimeEvent = RuntimeEvent;
-	type SessionsPerEra = SessionsPerEra;
-	type BondingDuration = BondingDuration;
-	type SessionInterface = Self;
-	type AppchainInterface = OctopusAppchain;
-	type UpwardMessagesInterface = OctopusUpwardMessages;
-	type PalletId = OctopusPalletId;
-	type WeightInfo = pallet_octopus_lpos::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub const MaxMessagePayloadSize: u32 = 256;
-	pub const MaxMessagesPerCommit: u32 = 20;
-}
-
-impl pallet_octopus_upward_messages::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Hashing = Keccak256;
-	type MaxMessagePayloadSize = MaxMessagePayloadSize;
-	type MaxMessagesPerCommit = MaxMessagesPerCommit;
-	type WeightInfo = pallet_octopus_upward_messages::weights::SubstrateWeight<Runtime>;
-}
 
 construct_runtime!(
 	pub enum Runtime where
@@ -804,16 +728,9 @@ construct_runtime!(
 		Timestamp: pallet_timestamp,
 		// Authorship must be before session in order to note author in the correct session and era
 		// for im-online and staking.
-		Authorship: pallet_authorship,
+	//	Authorship: pallet_authorship,
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
-		// OctopusAppchain must be before session.
-		OctopusAppchain: pallet_octopus_appchain,
-		OctopusBridge: pallet_octopus_bridge,
-		OctopusLpos: pallet_octopus_lpos,
-		OctopusUpwardMessages: pallet_octopus_upward_messages,
-		OctopusAssets: pallet_assets::<Instance1>,
-		OctopusUniques: pallet_uniques::<Instance1>,
 		Session: pallet_session,
 		Grandpa: pallet_grandpa,
 		Ethereum: pallet_ethereum,
@@ -823,7 +740,7 @@ construct_runtime!(
 		BaseFee: pallet_base_fee,
 		Sudo: pallet_sudo,
 		ImOnline: pallet_im_online,
-		Offences: pallet_offences,
+		//Offences: pallet_offences,
 		Historical: pallet_session_historical::{Pallet},
 		// BEEFY Bridges support.
 		Beefy: pallet_beefy,
@@ -970,10 +887,6 @@ mod benches {
 	define_benchmarks!(
 		[frame_benchmarking, BaselineBench::<Runtime>]
 		[frame_system, SystemBench::<Runtime>]
-		[pallet_octopus_lpos, OctopusLpos]
-		[pallet_octopus_bridge, BridgeBench::<Runtime>]
-		[pallet_octopus_appchain, AppchainBench::<Runtime>]
-		[pallet_octopus_upward_messages, OctopusUpwardMessages]
 	);
 }
 
@@ -1505,8 +1418,6 @@ impl_runtime_apis! {
 			// use pallet_offences_benchmarking::Pallet as OffencesBench;
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
-			use pallet_octopus_appchain_benchmarking::Pallet as AppchainBench;
-			use pallet_octopus_bridge_benchmarking::Pallet as BridgeBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 			list_benchmarks!(list, extra);
@@ -1526,13 +1437,9 @@ impl_runtime_apis! {
 			// which is why we need these two lines below.
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
-			use pallet_octopus_appchain_benchmarking::Pallet as AppchainBench;
-			use pallet_octopus_bridge_benchmarking::Pallet as BridgeBench;
 
 			impl frame_system_benchmarking::Config for Runtime {}
 			impl baseline::Config for Runtime {}
-			impl pallet_octopus_appchain_benchmarking::Config for Runtime {}
-			impl pallet_octopus_bridge_benchmarking::Config for Runtime {}
 
 			use frame_support::traits::WhitelistedStorageKeys;
 			let whitelist: Vec<TrackedStorageKey> = AllPalletsWithSystem::whitelisted_storage_keys();
