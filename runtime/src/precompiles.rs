@@ -81,9 +81,9 @@ pub type FrontierPrecompiles<R> = PrecompileSetBuilder<
 				PrecompileAt<AddressU64<1026>, ECRecoverPublicKey>,
 				// Moonbeam specific precompiles:
 				PrecompileAt<AddressU64<2050>, Erc20BalancesPrecompile<R, NativeErc20Metadata>>,
-				PrecompileAt<AddressU64<2051>, OctopusBridgePrecompile<R>>,
+				/*PrecompileAt<AddressU64<2051>, OctopusBridgePrecompile<R>>,
 				PrecompileAt<AddressU64<2052>, OctopusSessionPrecompile<R>>,
-				PrecompileAt<AddressU64<2053>, OctopusUniquesPrecompile<R>>,
+				PrecompileAt<AddressU64<2053>, OctopusUniquesPrecompile<R>>,*/
 			),
 		>,
 		// // Prefixed precompile sets (XC20)

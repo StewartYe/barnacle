@@ -226,6 +226,8 @@ parameter_types! {
 	//       Attempting to do so will brick block production.
 	pub const EpochDuration: u64 = EPOCH_DURATION_IN_SLOTS;
 	pub const ExpectedBlockTime: Moment = MILLISECS_PER_BLOCK;
+		pub const SessionsPerEra: u32 = 6;
+	pub const BondingDuration: u32 = 24 * 21;
 	pub const ReportLongevity: u64 =
 		BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
 }
@@ -639,7 +641,7 @@ parameter_types! {
 	pub const ValueLimit: u32 = 256;
 	pub const UniqueStringLimit: u32 = 2048;
 }
-
+/*
 pub type CollectionId = u128;
 pub type ItemId = u128;
 
@@ -663,7 +665,7 @@ impl pallet_uniques::Config<pallet_uniques::Instance1> for Runtime {
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type Locker = ();
 }
-
+*/
 impl pallet_beefy::Config for Runtime {
 	type BeefyId = BeefyId;
 	type MaxAuthorities = MaxAuthorities;
@@ -705,7 +707,7 @@ impl pallet_beefy_mmr::Config for Runtime {
 	type BeefyDataProvider = ();
 }
 
-pub struct OctopusAppCrypto;
+/*pub struct OctopusAppCrypto;
 
 impl frame_system::offchain::AppCrypto<<Signature as traits::Verify>::Signer, Signature>
 	for OctopusAppCrypto
@@ -714,7 +716,7 @@ impl frame_system::offchain::AppCrypto<<Signature as traits::Verify>::Signer, Si
 	type GenericSignature = ecdsa::Signature;
 	type GenericPublic = ecdsa::Public;
 }
-
+*/
 
 construct_runtime!(
 	pub enum Runtime where
@@ -731,6 +733,7 @@ construct_runtime!(
 	//	Authorship: pallet_authorship,
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
+		OctopusAssets: pallet_assets::<Instance1>,
 		Session: pallet_session,
 		Grandpa: pallet_grandpa,
 		Ethereum: pallet_ethereum,
